@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENEM Master — Questões + Redação</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <div class="logo">E</div>
+      <div><strong>ENEM Master</strong><span>questões + redação</span></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><small>RESPONDIDAS</small><b id="statAnswered">0</b></div>
+      <div class="stat ok"><small>ACERTOS</small><b id="statHits">0</b></div>
+      <div class="stat"><small>% ACERTO</small><b id="statPct">0%</b></div>
+      <div class="stat xp"><small id="xpLevel">NV 1</small><b id="statXP">0 XP</b></div>
+    </div>
+    <div class="top-actions">
+      <button id="btnSimulado" class="btn primary">▶ Simulado</button>
+      <button id="btnTheme" class="btn ghost" title="Alternar tema claro/escuro">🌙</button>
+      <button id="btnExport" class="btn ghost" title="Exportar backup">💾</button>
+      <button id="btnImport" class="btn ghost" title="Importar backup">📥</button>
+      <input type="file" id="importFile" accept=".json" class="hidden">
+      <button id="btnReset" class="btn ghost" title="Limpar progresso">↺</button>
+    </div>
+  </div>
+  <div class="a11y wrap">
+    <button id="fontMinus" class="btn small ghost" title="Diminuir fonte">A-</button>
+    <button id="fontPlus" class="btn small ghost" title="Aumentar fonte">A+</button>
+    <span class="muted" style="font-size:12px">Atalhos: 1-5 respondem • ←/→ páginas</span>
+  </div>
+  <div id="simBar" class="simbar hidden">
+    <div class="wrap simbar-inner">
+      <span id="simTimer">⏱ 00:00</span>
+      <span id="simInfo">Modo simulado</span>
+      <button id="btnFinishSim" class="btn small">Finalizar e corrigir</button>
+      <button id="btnCancelSim" class="btn small ghost">Sair</button>
+    </div>
+  </div>
+</header>
+
+<div class="hero wrap">
+  <div>
+    <h1>Estude para o ENEM por <span class="hl">áreas, matérias e redação</span></h1>
+    <p><b id="heroCounts">60 questões + 20 temas de redação</b> com gabarito comentado, dashboard de evolução, revisão espaçada, simulado com nota TRI e correção por competências.</p>
+    <div class="hero-tags">
+      <span>📝 <b id="tagQ">60</b> questões</span><span>✍️ <b id="tagR">20</b> temas</span><span>🎯 TRI simulado</span><span>📊 dashboard</span><span>💾 backup</span>
+    </div>
+  </div>
+  <div class="progress-card">
+    <div class="pc-head"><strong>Seu progresso</strong><span id="progressLabel">0%</span></div>
+    <div class="bar"><div id="progressBar"></div></div>
+    <div class="pc-grid">
+      <div><small>Linguagens</small><div class="bar mini"><div id="bar-linguagens"></div></div></div>
+      <div><small>Humanas</small><div class="bar mini"><div id="bar-humanas"></div></div></div>
+      <div><small>Natureza</small><div class="bar mini"><div id="bar-natureza"></div></div></div>
+      <div><small>Exatas</small><div class="bar mini"><div id="bar-exatas"></div></div></div>
+    </div>
+    <div class="dash-mini">
+      <div>🔥 <b id="statStreakMini">0</b> sequência</div>
+      <div>📚 <b id="revDueMini">0</b> revisões pendentes</div>
+      <div>✍️ <b id="redCountMini">0</b> redações</div>
+    </div>
+    <button id="btnDash" class="btn small" style="margin-top:10px;width:100%">📊 Ver meu desempenho</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<section class="wrap hidden" id="dashView">
+  <div class="dash-grid">
+    <div class="red-card"><h3>📊 Últimos 7 dias</h3><div id="chartDays" class="chart"></div></div>
+    <div class="red-card"><h3>🎯 Acerto por área</h3><div id="chartAreas" class="chart"></div></div>
+    <div class="red-card"><h3>📚 Revisão espaçada</h3><div id="revList"></div><button id="btnRevStart" class="btn small primary" style="margin-top:8px">Revisar agora (só erradas vencidas)</button></div>
+    <div class="red-card"><h3>🏅 Nível e XP</h3><div id="xpBox"></div><small class="muted">Fácil=10 • Médio=20 • Difícil=30 XP por acerto</small></div>
+    <div class="red-card"><h3>🎯 Meta diária</h3><div id="metaBox"></div><label class="muted" style="font-size:13px">Meta/dia: <input type="number" id="metaInput" min="1" max="100" value="10" style="width:64px"> <button id="btnMetaSave" class="btn small ghost">Salvar</button></label><div id="daysCal" class="dayscal"></div></div>
+    <div class="red-card"><h3>🍅 Pomodoro</h3><div id="pomoBox"><div id="pomoTime" class="pomotime">25:00</div><div class="red-btns"><button id="btnPomoStart" class="btn small primary">▶ Iniciar</button><button id="btnPomoReset" class="btn small ghost">↺ Zerar</button><select id="pomoMode"><option value="25">Foco 25</option><option value="50">Foco 50</option><option value="5">Pausa 5</option><option value="15">Pausa 15</option></select></div><small class="muted">Ciclos concluídos: <b id="pomoCycles">0</b></small></div></div>
+    <div class="red-card"><h3>🏆 Conquistas</h3><div id="conqList" class="conqs"></div></div>
+    <div class="red-card"><h3>📄 Relatórios</h3><p class="muted" style="font-size:13px">Baixe seu desempenho detalhado.</p><div class="red-btns"><button id="btnCsv" class="btn small">⬇ CSV questões</button><button id="btnReport" class="btn small ghost">⬇ Resumo .txt</button></div></div>
+  </div>
+  <button id="btnDashClose" class="btn small ghost" style="margin-bottom:14px">← Voltar às questões</button>
+</section>
+
+<nav class="wrap areas" id="areaTabs"></nav>
+
+<div class="wrap toolbar" id="questoesToolbar">
+  <div id="subjectTabs" class="subjects"></div>
+  <div class="filters">
+    <input id="search" type="search" placeholder="🔍 Buscar por tema, palavra-chave...">
+    <select id="filterDiff"><option value="">Todas dificuldades</option><option value="Fácil">Fácil</option><option value="Médio">Médio</option><option value="Difícil">Difícil</option></select>
+    <select id="filterStatus"><option value="">Todos status</option><option value="unanswered">Não respondidas</option><option value="correct">Acertadas</option><option value="wrong">Erradas</option><option value="review">Para revisar</option><option value="fav">Favoritas</option><option value="due">🔁 Revisão vencida</option></select>
+    <select id="filterFonte"><option value="">Todas fontes</option><option value="autoral">Autoral estilo ENEM</option><option value="ENEM">Prova ENEM oficial</option></select>
+    <button id="btnShuffle" class="btn ghost">🔀 Embaralhar</button>
+    <button id="btnErradas" class="btn ghost">🎯 Só erradas</button>
+  </div>
+</div>
+
+<main class="wrap" id="questoesMain">
+  <p id="resultCount" class="count"></p>
+  <div id="questions"></div>
+  <div id="pagination" class="pagination"></div>
+  <div id="empty" class="empty hidden">Nenhuma questão encontrada. <button class="btn small" onclick="window.__clearFilters()">Limpar filtros</button></div>
+</main>
+
+<!-- MODAL SIMULADO -->
+<div id="simModal" class="modal hidden">
+  <div class="modal-card">
+    <h2>▶ Configurar simulado</h2>
+    <label>Quantas questões? <b id="simNLabel">10</b><input type="range" id="simN" min="5" max="80" step="5" value="10"></label>
+    <label>Tempo limite (min) <b id="simTLabel">30</b><input type="range" id="simT" min="5" max="270" step="5" value="30"></label>
+    <label>Área <select id="simArea"><option value="todas">Todas (misto TRI)</option><option value="linguagens">Linguagens</option><option value="humanas">Humanas</option><option value="natureza">Natureza</option><option value="exatas">Exatas</option></select></label>
+    <label class="chk"><input type="checkbox" id="simEmbaralhar" checked> Embaralhar ordem e alternativas? (treino real)</label>
+    <div class="modal-btns"><button id="btnSimStart" class="btn primary">Começar</button><button id="btnSimClose" class="btn ghost">Cancelar</button></div>
+  </div>
+</div>
+<div id="simResult" class="modal hidden"><div class="modal-card"><h2>🏁 Resultado TRI</h2><div id="simResultBody"></div><div class="modal-btns"><button id="btnSimResultClose" class="btn primary">Ver gabarito comentado</button></div></div></div>
+
+<!-- REDAÇÃO -->
+<section class="wrap hidden" id="redacaoView">
+  <div class="red-grid">
+    <div class="red-left">
+      <h2>✍️ Temas para treinar</h2>
+      <input id="temaSearch" type="search" placeholder="🔍 Filtrar temas..." style="width:100%;margin:6px 0">
+      <div id="temasList" class="temas"></div>
+      <div class="red-card tips">
+        <b>📐 Estrutura nota mil</b>
+        <ol><li><b>Introdução:</b> contextualize + tese + repertório.</li><li><b>D1:</b> causa/argumento + exemplo.</li><li><b>D2:</b> consequência ou 2ª causa.</li><li><b>Conclusão:</b> agente + ação + meio + finalidade + DH.</li></ol>
+        <button id="btnModelo" class="btn small" style="margin-top:8px">📋 Carregar esqueleto</button>
+        <button id="btnFolha" class="btn small ghost" style="margin-top:8px">🖨 Folha 30 linhas (imprimir)</button>
+      </div>
+      <div class="red-card"><b>📚 Repertórios coringa</b><div id="repList"></div></div>
+    </div>
+    <div class="red-right">
+      <div class="red-card" id="temaAtivo"></div>
+      <div class="red-card">
+        <div class="red-editor-head"><b>📝 Sua redação</b><span id="redTimer" class="timer">⏱ 00:00</span></div>
+        <div class="red-btns">
+          <button id="btnRedTimer" class="btn small primary">▶ Iniciar</button>
+          <button id="btnRedZerar" class="btn small ghost">↺ Zerar</button>
+          <button id="btnRedSave" class="btn small primary">💾 Salvar</button>
+          <button id="btnRedDown" class="btn small ghost">⬇ .txt</button>
+          <button id="btnRedClear" class="btn small ghost">🗑 Limpar</button>
+        </div>
+        <textarea id="redTexto" rows="16" placeholder="Escreva aqui... 1 parágrafo por ideia, pule linha entre eles."></textarea>
+        <div id="redStats" class="red-stats"></div>
+        <div class="bar"><div id="redBar"></div></div>
+        <small id="redBarLabel" class="muted"></small>
+        <h4>🤖 Análise automática</h4><div id="redCheck"></div>
+      </div>
+      <div class="red-card"><h3 style="margin:0">🎯 Correção por competências</h3><div id="compBox"></div><div class="nota-box"><span id="notaTotal">600 / 1000</span><small id="notaNivel"></small></div></div>
+      <div class="red-card"><h3 style="margin:0">💾 Minhas redações <small id="draftCount" class="muted"></small></h3><div id="evolRed"></div><div id="draftsList"></div></div>
+    </div>
+  </div>
+  <div id="folhaPrint" class="hidden-print"><h2 id="folhaTitulo"></h2><div id="folhaLinhas"></div></div>
+</section>
+
+<!-- FLASHCARDS -->
+<section class="wrap hidden" id="flashView">
+  <div class="red-card" style="text-align:center">
+    <h2 style="margin:4px 0">🃏 Flashcards <small class="muted" id="flashCount"></small></h2>
+    <div class="filters" style="justify-content:center">
+      <select id="flashArea"><option value="todas">Todas as áreas</option><option value="linguagens">Linguagens</option><option value="humanas">Humanas</option><option value="natureza">Natureza</option><option value="exatas">Exatas</option></select>
+      <button id="btnFlashShuffle" class="btn small ghost">🔀 Embaralhar</button>
+    </div>
+    <div id="flashCard" class="flashcard"><div id="flashFront" class="ffront"></div><div id="flashBack" class="fback hidden"></div><small class="muted">clique na carta para virar</small></div>
+    <div class="red-btns" style="justify-content:center">
+      <button id="btnFlashKnow" class="btn small primary">✅ Sei</button>
+      <button id="btnFlashUnknown" class="btn small">❌ Não sei</button>
+      <button id="btnFlashNext" class="btn small ghost">Próxima →</button>
+    </div>
+    <div id="flashStats" class="red-stats" style="justify-content:center"></div>
+  </div>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+
+<footer><div class="wrap">ENEM Master • questões + redação • funciona offline (PWA) • backup em 💾</div></footer>
+
+<script src="questoes.js"></script>
+<script src="redacao.js"></script>
+<script src="flashcards.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}</script>
+</body>
+</html>
